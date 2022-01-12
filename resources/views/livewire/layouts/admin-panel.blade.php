@@ -11,7 +11,7 @@
 
 	<!-- Styles -->
 	@if(config('adminPanel.projectTailwindCss'))
-		<link rel="stylesheet" href="{{ asset(config('adminPanel.projectCssFile')) }}">
+		<link rel="stylesheet" href="{{ asset(config('adminPanel.projectTailwindCss')) }}">
 	@else
 		{{-- If the project does not use Tailwind, use this raw Tailwind version from CDN --}}
 		<link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
