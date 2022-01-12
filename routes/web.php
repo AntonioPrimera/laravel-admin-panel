@@ -16,16 +16,15 @@ use Illuminate\Support\Facades\Route;
 //Route::get('admin-panel/', \AntonioPrimera\AdminPanel\Http\Livewire\Dashboard::class);
 
 //dump(config('adminPanel.routes.prefix', ''));
-//Route::
-	//->middleware('auth')
-	//->group(function () {
+Route::middleware(config('adminPanel.routes.middleware', 'web'))
+	->group(function () {
 		//Route::view('/', 'admin-panel::admin-panel');
 		//Route::get('admin-panel/', \AntonioPrimera\AdminPanel\Http\Livewire\Dashboard::class);
 		
 		foreach (\AntonioPrimera\AdminPanel\AdminPageManager::getUrls() as $url => $className) {
 			Route::get($url, '\\' . $className)->middleware([]);
 		}
-	//});
+	});
 //Route::get('/dashboard', function () {
 //    return view('dashboard');
 //})->middleware(['auth'])->name('dashboard');

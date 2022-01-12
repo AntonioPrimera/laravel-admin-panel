@@ -23,5 +23,8 @@ return [
 	'routes' => [
 		'prefix' 		 => 'admin-panel',
 		'useComplexUrls' => env('ADMIN_PANEL_COMPLEX_URLS', false),
+		
+		//todo: document this
+		'middleware'	 => ['web', 'auth'],
 	],
 ];
