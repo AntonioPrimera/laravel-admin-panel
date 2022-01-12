@@ -1,0 +1,46 @@
+{
+    "name": "antonioprimera/laravel-admin-panel",
+    "description": "A simple Laravel Admin Panel",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Antonio",
+            "email": "antonio@cus.ro"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../*"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "livewire/livewire": "^2.7",
+        "antonioprimera/laravel-heroicons": "*"
+    },
+
+    "require-dev": {
+        "antonioprimera/lara-packager": "*",
+        "orchestra/testbench": "^6.0",
+        "antonioprimera/phpunit-custom-assertions": "^1.0",
+        "antonioprimera/laravel-generator-command": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "AntonioPrimera\\AdminPanel\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AntonioPrimera\\AdminPanel\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+				"AntonioPrimera\\AdminPanel\\AdminPanelServiceProvider"
+            ]
+        }
+    }
+}
