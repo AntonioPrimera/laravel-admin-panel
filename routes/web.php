@@ -19,8 +19,17 @@ Route::middleware(config('adminPanel.routes.middleware', 'web'))
 	->group(function () {
 		//Route::view('/', 'admin-panel::admin-panel');
 		//Route::get('admin-panel/', \AntonioPrimera\AdminPanel\Http\Livewire\Dashboard::class);
+		$urls = AdminPageManager::getUrls();
 		
-		foreach (AdminPageManager::getUrls() as $url => $className) {
-			Route::get($url, '\\' . $className)->middleware([]);
+		//dump($urls->first(fn($className, $url) => $url === '/'));
+		//dump($urls->first());
+		
+		//if we don't have root admin page (url = '/') set the first admin page as root
+		if (!$urls->first(fn($className, $url) => $url === '/')) {
+			Route::get(rtrim(config('adminPanel.routes.prefix'), '/') . '/', '\\' . $urls->first());
+		}
+		
+		foreach ($urls as $url => $className) {
+			Route::get($url, '\\' . $className);
 		}
 	});
