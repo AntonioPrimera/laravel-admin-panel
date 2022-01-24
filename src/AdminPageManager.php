@@ -2,6 +2,7 @@
 
 namespace AntonioPrimera\AdminPanel;
 
+use AntonioPrimera\AdminPanel\Http\Livewire\Dashboard;
 use AntonioPrimera\AdminPanel\View\AdminPage;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -11,9 +12,8 @@ class AdminPageManager
 	protected static ?Collection $adminComponentClasses = null;
 	
 	/**
-	 * Get an associative collection of AdminPage child classes in the admin-panel package, merged with the ones
-	 * from the application. The application folder and the namespace can be provided if they differ from
-	 * the given defaults. The keys of the classes are the slugs of the component page names.
+	 * Get an associative collection of Admin Pages [uid => ClassName]. If no
+	 * Admin Pages are present, the default Admin Dashboard is shown.
 	 *
 	 * @return Collection
 	 */
@@ -23,10 +23,10 @@ class AdminPageManager
 		if (static::$adminComponentClasses)
 			return static::$adminComponentClasses;
 		
-		$packageComponents = static::getClasses(
-			static::adminPanelPackagePath('src/Http/Livewire'),
-			'AntonioPrimera\\AdminPanel\\Http\\Livewire'
-		);
+		//$packageComponents = static::getClasses(
+		//	static::adminPanelPackagePath('src/Http/Livewire'),
+		//	'AntonioPrimera\\AdminPanel\\Http\\Livewire'
+		//);
 		
 		$appComponents = static::getClasses(
 			base_path(config('adminPanel.pages.folder')),
@@ -34,7 +34,9 @@ class AdminPageManager
 		);
 		
 		//buffer the result, so we don't have to read the disk again next time
-		static::$adminComponentClasses = $packageComponents->merge($appComponents);
+		static::$adminComponentClasses = $appComponents->isEmpty()
+			? collect([Dashboard::getAdminPageUid() => Dashboard::class])//$packageComponents
+			: $appComponents;
 		
 		return static::$adminComponentClasses;
 	}
@@ -63,21 +65,21 @@ class AdminPageManager
 	
 	//--- Protected helpers -------------------------------------------------------------------------------------------
 	
-	/**
-	 * Get the absolute path to an admin panel relative path. If no
-	 * $path parameter is given, the absolute root path of
-	 * the admin panel package is returned.
-	 *
-	 * @param string|null $path
-	 *
-	 * @return string
-	 */
-	protected static function adminPanelPackagePath(?string $path = null)
-	{
-		return rtrim(dirname(__DIR__), DIRECTORY_SEPARATOR)
-			. DIRECTORY_SEPARATOR
-			. ltrim($path ? $path : '', DIRECTORY_SEPARATOR);
-	}
+	///**
+	// * Get the absolute path to an admin panel relative path. If no
+	// * $path parameter is given, the absolute root path of
+	// * the admin panel package is returned.
+	// *
+	// * @param string|null $path
+	// *
+	// * @return string
+	// */
+	//protected static function adminPanelPackagePath(?string $path = null)
+	//{
+	//	return rtrim(dirname(__DIR__), DIRECTORY_SEPARATOR)
+	//		. DIRECTORY_SEPARATOR
+	//		. ltrim($path ? $path : '', DIRECTORY_SEPARATOR);
+	//}
 	
 	/**
 	 * Get a collection of class names in the given folder, with the given namespace.
