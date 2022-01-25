@@ -145,7 +145,49 @@
 					</div>
 
 					<div class="ml-4 flex items-center md:ml-6">
-						{{ $headerRight ?? '' }}
+
+						@auth
+							{{-- Profile dropdown - top right --}}
+							<div class="ml-3 relative hidden md:block px-8" x-data="{profileOpen: false}" @click.outside="profileOpen = false">
+								<div>
+									<button @click="profileOpen = !profileOpen" type="button" class="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+										<span class="sr-only">Open user menu</span>
+										{{-- HeroIcon: user --}}
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+										</svg>
+										<span class="pl-2">{{ auth()->user()->name }}</span>
+									</button>
+								</div>
+
+								<!--
+								  Dropdown menu, show/hide based on menu state.
+
+								  Entering: "transition ease-out duration-100"
+									From: "transform opacity-0 scale-95"
+									To: "transform opacity-100 scale-100"
+								  Leaving: "transition ease-in duration-75"
+									From: "transform opacity-100 scale-100"
+									To: "transform opacity-0 scale-95"
+								-->
+								<div x-show="profileOpen" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+									<!-- Active: "bg-gray-100", Not Active: "" -->
+									<form method="POST" action="{{ route('logout') }}">
+										@csrf
+
+										<a :href="route('logout')"
+										   onclick="event.preventDefault();this.closest('form').submit();"
+										   class="block px-4 py-2 text-sm text-gray-700 cursor-pointer"
+										   role="menuitem"
+										   tabindex="-1"
+										>
+											{{ __('Log Out') }}
+										</a>
+									</form>
+								</div>
+							</div>
+						@endauth
+
 					</div>
 				</div>
 			</div>
