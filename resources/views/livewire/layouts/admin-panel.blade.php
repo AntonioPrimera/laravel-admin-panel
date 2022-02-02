@@ -175,7 +175,7 @@
 									<form method="POST" action="{{ route('logout') }}">
 										@csrf
 
-										<a :href="route('logout')"
+										<a href="{{ route('logout') }}"
 										   onclick="event.preventDefault();this.closest('form').submit();"
 										   class="block px-4 py-2 text-sm text-gray-700 cursor-pointer"
 										   role="menuitem"
