@@ -103,22 +103,21 @@ the blade files corresponding to the livewire admin panel components. The *pages
 relative to the *pages.viewPath* path. The defaults for these settings are: `resources/views` and
 `livewire/admin-panel`, so that concatenated, they point to `resources/views/livewire/admin-panel`.
 
-#### routes.prefix
+#### routePrefix
 
 This is the route prefix for all admin panel pages and also the route to the admin panel dashboard (the
 entry point to the admin panel). By default, this is `admin-panel`, so that your admin panel can be
-accessed at `https://your.project.url/admin-panel`.
+accessed at `https://your.project.url/admin-panel`. If you want to better secure your admin panel, you can
+use a radom route prefix, configurable in the corresponding config file or as an ENV variable:
 
-#### routes.useComplexUrls
+`ADMIN_PANEL_ROUTE_PREFIX="/random/admin-panel/prefix"`
 
-This setting is a boolean flag, and determines whether to obfuscate the admin panel urls. In other words,
-if this setting is set to true, the urls of the admin panel and its pages will be some md5 hashes, instead
-of easily readable page names. This makes it harder for people to guess the urls of the admin
-panel and its pages. By default, this setting can be changed in your .env file, using the env setting
-`ADMIN_PANEL_COMPLEX_URLS`. If not set in the .env file, this is boolean `false`, so when you start
-developing, and testing you can easily access the admin-panel. It is recommended that you set this
-to `true`, to provide an extra layer of security to your admin panel. In future versions, this might
-default to true.
+#### middleware
+
+You can define the middleware to be applied to all admin-panel pages. By default, the following middleware
+is configured to be applied `'middleware' => ['web', 'auth']`. For development purposes, you can remove the
+`auth` middleware, so that you can access the admin panel without the need to register and log in. Don't
+forget to add the auth middleware back, or some sort of protection, when you deploy your application.
 
 ## ToDo
 

@@ -141,28 +141,18 @@ abstract class AdminPage extends Component
 	
 	/**
 	 * Get the icon of this page in the admin panel menu
-	 *
-	 * @return string | HeroIcon | null
 	 */
-	public static function getAdminMenuIcon()
+	public static function getAdminMenuIcon(): HeroIcon | null
 	{
 		return static::getHeroIcon(static::$adminMenuIcon);
 	}
 	
 	public static function getAdminPageUrl(): string
 	{
-		$prefix = trim(config('adminPanel.routes.prefix', ''), '/');
+		$prefix = trim(config('adminPanel.routePrefix', ''), '/');
 		$pageUrl = trim(static::$adminPageUrl ?: static::getAdminPageUid(), '/');
-		$useComplexUrls = config('adminPanel.routes.useComplexUrls', false);
 		
-		$urlParts = array_filter([
-			$prefix,
-			$useComplexUrls ? md5(env('APP_KEY', 'random-string') . $pageUrl) : $pageUrl
-		]);
-		
-		return '/' . implode('/', $urlParts);
-			//. ($prefix ? trim($prefix, '/') . '/' : '')
-			//. ($useComplexUrls ? md5(env('APP_KEY', 'random-string') . $pageUrl) : $pageUrl);
+		return '/' . implode('/', array_filter([$prefix, $pageUrl]));
 	}
 	
 	/**
@@ -175,7 +165,7 @@ abstract class AdminPage extends Component
 		return static::$adminPagePosition;
 	}
 	
-	protected static function isHeroIconDescriptor($icon)
+	protected static function isHeroIconDescriptor(?string $icon)
 	{
 		return $icon
 			&& is_string($icon)
@@ -190,12 +180,8 @@ abstract class AdminPage extends Component
 	 * must contain the name and optionally the format.
 	 *
 	 * e.g. heroicon:home:solid
-	 *
-	 * @param $iconDescriptor
-	 *
-	 * @return HeroIcon
 	 */
-	protected static function getHeroIcon($iconDescriptor)
+	protected static function getHeroIcon(?string $iconDescriptor): string | null | HeroIcon
 	{
 		if (!static::isHeroIconDescriptor($iconDescriptor))
 			return $iconDescriptor;

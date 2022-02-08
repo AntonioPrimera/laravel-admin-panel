@@ -20,11 +20,13 @@ return [
 		'bladePath' => 'livewire/admin-panel',
 	],
 	
-	'routes' => [
-		'prefix' 		 => 'admin-panel',
-		'useComplexUrls' => env('ADMIN_PANEL_COMPLEX_URLS', false),
-		
-		//todo: document this
-		'middleware'	 => ['web', 'auth'],
-	],
+	'routePrefix' => env('ADMIN_PANEL_ROUTE_PREFIX', 'admin-panel'),
+	'middleware'  => ['web', 'auth'],
+	
+	//'routes' => [
+	//	'prefix' 		 => env('ADMIN_PANEL_ROUTE_PREFIX', 'admin-panel'),
+	//
+	//	//todo: document this
+	//	'middleware'	 => ['web', 'auth'],
+	//],
 ];
