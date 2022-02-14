@@ -66,6 +66,9 @@ Route::middleware(config('adminPanel.middleware', 'web'))
 			}
 		}
 		
-		if (!$hasAdminPanelRoot && $firstRoute)
+		if (!$hasAdminPanelRoot && $firstRoute) {
 			$firstRoute->name('admin-panel');
+			//also add a redirect route from the root admin-panel url to the url of the first admin page
+			Route::redirect("/$routePrefix", $firstRoute->uri());
+		}
 	});
