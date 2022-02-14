@@ -56,7 +56,7 @@ class AdminPageManager
 		$componentClasses = static::getAdminComponentClasses();
 		
 		return $componentClasses
-			->sortBy(fn($className) => $className::$adminPagePosition)
+			->sortBy(fn($className) => $className::getAdminPagePosition())
 			->mapWithKeys(
 				function($className) {
 					return [$className::getAdminPageUrl() => $className];
