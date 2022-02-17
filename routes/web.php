@@ -17,32 +17,7 @@ use Illuminate\Support\Facades\Route;
 //dump(config('adminPanel.routePrefix', ''));
 Route::middleware(config('adminPanel.middleware', 'web'))
 	->group(function () {
-		//Route::view('/', 'admin-panel::admin-panel');
-		//Route::get('admin-panel/', \AntonioPrimera\AdminPanel\Http\Livewire\Dashboard::class);
 		$urls = AdminPageManager::getUrls();
-		
-		////try to find the root item [url => componentClassName]
-		//$rootUrl = '/' . trim(config('adminPanel.routePrefix'), '/');
-		//$rootComponentClass = $urls->get($rootUrl);
-		//
-		//if ($rootComponentClass) {
-		//	Route::get($rootUrl, '\\' . $rootComponentClass)->name('admin-panel');
-		//	$urls = $urls->filter(fn($componentClass, $url) => $url !== '/');
-		//} else {
-		//	//redirect from the root to the
-		//	//$first = $urls->take(1);
-		//	$firstUrl = $urls->take(1)->keys()->first();
-		//	//$firstClassName = $first->values()->first();
-		//	//Route::get($firstUrl, '\\' . $firstClassName)->name('admin-panel');
-		//	Route::redirect($rootUrl, $firstUrl)->name('admin-panel');
-		//
-		//	//$urls->shift();
-		//}
-		
-		////if we don't have root admin page (url = '/') set the first admin page as root
-		//if (!$urls->first(fn($className, $url) => $url === '/')) {
-		//	Route::get(rtrim(config('adminPanel.routePrefix'), '/') . '/', '\\' . $urls->first())->name('admin-panel');
-		//}
 		
 		/*
 		 * Create a route for each url. If we have a root url for the admin panel (e.g. '/admin-panel') set the route
@@ -69,6 +44,6 @@ Route::middleware(config('adminPanel.middleware', 'web'))
 		if (!$hasAdminPanelRoot && $firstRoute) {
 			$firstRoute->name('admin-panel');
 			//also add a redirect route from the root admin-panel url to the url of the first admin page
-			Route::redirect("/$routePrefix", $firstRoute->uri());
+			Route::redirect("/$routePrefix", '/' . ltrim($firstRoute->uri(), '/'));
 		}
 	});
