@@ -1,32 +1,23 @@
 <?php
 
 return [
-	'layout' => 'admin-panel::livewire.layouts.admin-panel',
+	'layout' => 'admin-panel::layouts.default',
 	
 	//set to boolean false if the project does not use TailwindCss
 	'projectTailwindCss' => 'css/app.css',
 	
-	'pages' => [
-		//the app folder where the AdminPanel component classes are located
-		'folder' 	=> 'app/Http/Livewire/AdminPanel',
-		
-		//the namespace of the AdminPage components
-		'namespace' => 'App\\Http\\Livewire\\AdminPanel',
-		
-		//path relative to the project root
-		'viewPath'  => 'resources/views',
-
-		//the location of the blade files, relative to the viewPath setting above
-		'bladePath' => 'livewire/admin-panel',
-	],
-	
 	'routePrefix' => env('ADMIN_PANEL_ROUTE_PREFIX', 'admin-panel'),
-	'middleware'  => ['web', 'auth'],
+	'middleware'  => explode(',', env('ADMIN_PANEL_MIDDLEWARE', 'web,auth')),
 	
-	//'routes' => [
-	//	'prefix' 		 => env('ADMIN_PANEL_ROUTE_PREFIX', 'admin-panel'),
-	//
-	//	//todo: document this
-	//	'middleware'	 => ['web', 'auth'],
-	//],
+	'pages' => [
+		//add all your admin pages here
+		//'gallery' => [
+		//	'name' 	=> 'Gallery',				//the name / title of the admin page
+		//	'icon' 	=> 'heroicon:photograph',	//the heroicon name (prefixed with 'hero:' or 'heroicon:')
+		//	'menuLabel' => null, 				//the label in the menu (by default the admin page name is used)
+		//	'position' => 0,					//the position in the menu
+		//	'uid' => null,						//by default, the uid is determined dynamically (used in the route)
+		//	'view' => LivewireComponentClass::class, // 'blade.component' // '<div>Inline view</div>
+		//],
+	],
 ];

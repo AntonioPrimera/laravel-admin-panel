@@ -1,3 +1,4 @@
+@props(['activeAdminPage' => null])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-gray-100">
 <head>
@@ -14,7 +15,8 @@
 		<link rel="stylesheet" href="{{ asset(config('adminPanel.projectTailwindCss')) }}">
 	@else
 		{{-- If the project does not use Tailwind, use this raw Tailwind version from CDN --}}
-		<link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+		<script src="https://cdn.tailwindcss.com"></script>
+{{--		<link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">--}}
 	@endif
 
 	<!-- Scripts -->
@@ -77,20 +79,20 @@
 				</div>
 
 				<div class="flex-shrink-0 flex items-center px-4">
-					<h1 class="text-2xl font-semibold text-white">{{ 'Admin Panel' }}</h1>
+					<a class="text-2xl font-semibold text-white" href="{{ route('admin-panel-dashboard') }}">{{ 'Admin Panel' }}</a>
 				</div>
 
 				<div class="mt-5 flex-1 h-0 overflow-y-auto">
 					<nav class="px-2 space-y-1">
 
-						@foreach($adminMenu as $menuItem)
-							<a href="{{ $menuItem['url'] }}" class="{{ $menuItem['uid'] === $activeAdminPageUid ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} group flex items-center px-2 py-2 text-base font-medium rounded-md">
-								@if($menuItem['icon'] instanceof \AntonioPrimera\HeroIcons\HeroIcon)
-									{!! $menuItem['icon']->setClass('mr-4 flex-shrink-0 h-6 w-6 ' . ($menuItem['uid'] === $activeAdminPageUid ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'))->render() !!}
-								@elseif(is_string($menuItem['icon']))
-									{!! $menuItem['icon'] !!}
+						@foreach(\AntonioPrimera\AdminPanel\Facades\AdminPanel::getPages() as $adminPage)
+							<a href="{{ $adminPage->getUrl() }}" class="{{ $adminPage->isActive() ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} group flex items-center px-2 py-2 text-base font-medium rounded-md">
+								@if($adminPage->hasHeroIcon())
+									{!! $adminPage->getHeroIcon()->setClass('mr-4 flex-shrink-0 h-6 w-6 ' . ($adminPage->isActive() ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'))->render() !!}
+								@else
+									{!! $adminPage->getIcon() !!}
 								@endif
-								{{ $menuItem['label'] }}
+								{{ $adminPage->getMenuLabel() }}
 							</a>
 						@endforeach
 
@@ -108,19 +110,19 @@
 			<!-- Sidebar component, swap this element with another sidebar if you like -->
 			<div class="flex-1 flex flex-col min-h-0 bg-gray-800">
 				<div class="flex items-center h-16 flex-shrink-0 px-4 bg-gray-900">
-					<h1 class="text-2xl font-semibold text-white">{{ 'Admin Panel' }}</h1>
+					<a class="text-2xl font-semibold text-white" href="{{ route('admin-panel-dashboard') }}">{{ 'Admin Panel' }}</a>
 				</div>
 				<div class="flex-1 flex flex-col overflow-y-auto">
 					<nav class="flex-1 px-2 py-4 space-y-1">
 						{{-- todo: make a component for this menu and maybe use it also for the mobile menu --}}
-						@foreach($adminMenu as $menuItem)
-							<a href="{{ $menuItem['url'] }}" class="{{ $menuItem['uid'] === $activeAdminPageUid ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-								@if($menuItem['icon'] instanceof \AntonioPrimera\HeroIcons\HeroIcon)
-									{!! $menuItem['icon']->setClass('mr-3 flex-shrink-0 h-6 w-6 ' . ($menuItem['uid'] === $activeAdminPageUid ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'))->render() !!}
-								@elseif(is_string($menuItem['icon']))
-									{!! $menuItem['icon'] !!}
+						@foreach(\AntonioPrimera\AdminPanel\Facades\AdminPanel::getPages() as $adminPage)
+							<a href="{{ $adminPage->getUrl() }}" class="{{ $adminPage->isActive() ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+								@if($adminPage->hasHeroIcon())
+									{!! $adminPage->getHeroIcon()->setClass('mr-3 flex-shrink-0 h-6 w-6 ' . ($adminPage->isActive() ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'))->render() !!}
+								@else
+									{!! $adminPage->getIcon() !!}
 								@endif
-								{{ $menuItem['label'] }}
+								{{ $adminPage->getMenuLabel() }}
 							</a>
 						@endforeach
 					</nav>
@@ -141,7 +143,7 @@
 				</button>
 				<div class="flex-1 px-4 flex justify-between">
 					<div class="max-w-7xl px-4 sm:px-6 md:px-8 flex-1 flex items-center">
-						<h1 class="text-2xl font-semibold text-gray-900">{{ $adminPageName ?? '-- Admin Page Name --' }}</h1>
+						<h1 class="text-2xl font-semibold text-gray-900">{{ $activeAdminPage ? $activeAdminPage->getName() : 'Dashboard' }}</h1>
 					</div>
 
 					<div class="ml-4 flex items-center md:ml-6">
@@ -201,23 +203,6 @@
 			</main>
 		</div>
 	</div>
-
-
-{{--	<div class="min-h-screen bg-gray-100">--}}
-{{--	@include('layouts.navigation')--}}
-
-{{--	<!-- Page Heading -->--}}
-{{--		<header class="bg-white shadow">--}}
-{{--			<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">--}}
-{{--				{{ $header }}--}}
-{{--			</div>--}}
-{{--		</header>--}}
-
-{{--		<!-- Page Content -->--}}
-{{--		<main>--}}
-{{--			{{ $slot }}--}}
-{{--		</main>--}}
-{{--	</div>--}}
 
 	@livewireScripts
 </body>

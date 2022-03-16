@@ -8,21 +8,13 @@
             "email": "antonio@cus.ro"
         }
     ],
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../*"
-        }
-    ],
     "minimum-stability": "dev",
     "require": {
         "livewire/livewire": "^2.7",
-        "antonioprimera/laravel-heroicons": "*",
-        "antonioprimera/laravel-generator-command": "*"
+        "antonioprimera/laravel-heroicons": "*"
     },
 
     "require-dev": {
-        "antonioprimera/lara-packager": "*",
         "orchestra/testbench": "^6.0",
         "antonioprimera/phpunit-custom-assertions": "^1.0"
     },
@@ -40,7 +32,10 @@
         "laravel": {
             "providers": [
 				"AntonioPrimera\\AdminPanel\\AdminPanelServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "AdminPanel": "AntonioPrimera\\AdminPanel\\Facades\\AdminPanel"
+            }
         }
     }
 }

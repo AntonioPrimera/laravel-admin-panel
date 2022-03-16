@@ -1,117 +1,91 @@
 <?php
-
 namespace AntonioPrimera\AdminPanel;
 
-use AntonioPrimera\AdminPanel\Http\Livewire\Dashboard;
-use AntonioPrimera\AdminPanel\View\AdminPage;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Str;
 
 class AdminPageManager
 {
-	protected static ?Collection $adminComponentClasses = null;
+	protected ?Collection $pages = null;
 	
-	/**
-	 * Get an associative collection of Admin Pages [uid => ClassName]. If no
-	 * Admin Pages are present, the default Admin Dashboard is shown.
-	 *
-	 * @return Collection
-	 */
-	public static function getAdminComponentClasses()
+	public function getPages(): Collection
 	{
-		//if we have the result buffered, just return it
-		if (static::$adminComponentClasses)
-			return static::$adminComponentClasses;
+		if (!$this->pages)
+			$this->setupPageCollection();
 		
-		//$packageComponents = static::getClasses(
-		//	static::adminPanelPackagePath('src/Http/Livewire'),
-		//	'AntonioPrimera\\AdminPanel\\Http\\Livewire'
-		//);
-		
-		$appComponents = static::getClasses(
-			base_path(config('adminPanel.pages.folder')),
-			config('adminPanel.pages.namespace')
-		);
-		
-		//buffer the result, so we don't have to read the disk again next time
-		static::$adminComponentClasses = $appComponents->isEmpty()
-			? collect([Dashboard::getAdminPageUid() => Dashboard::class])//$packageComponents
-			: $appComponents;
-		
-		return static::$adminComponentClasses;
+		return $this->pages;
 	}
 	
-	/**
-	 * A shortcut to get a collection of all admin page urls and the
-	 * corresponding livewire component classes. This is used
-	 * in generating the routes programmatically.
-	 *
-	 * Return format:
-	 * [pageUrl => AdminPageClassName]
-	 *
-	 * @return Collection
-	 */
-	public static function getUrls()
+	public function getPage(string $uid): AdminPage|null
 	{
-		$componentClasses = static::getAdminComponentClasses();
+		return $this->getPages()->first(fn(AdminPage $adminPage) => $adminPage->getUid() === $uid);
+	}
+	
+	public function getPageByUrl(string $url)
+	{
+		return $this->getPages()->first(fn(AdminPage $adminPage) => $adminPage->getRawUrl() === $url);
+	}
+	
+	public function getLayout(): string
+	{
+		return config('adminPanel.layout', 'admin-panel::layouts.default');
+	}
+	
+	public function addPage(AdminPage $adminPage)
+	{
+		$this->getPages()
+			->put($adminPage->getUid(), $adminPage);
 		
-		return $componentClasses
-			->sortBy(fn($className) => $className::getAdminPagePosition())
-			->mapWithKeys(
-				function($className) {
-					return [$className::getAdminPageUrl() => $className];
-				}
-			);
+		$this->sortAdminPages();
+	}
+	
+	public function addPages(Collection $pages)
+	{
+		$this->pages = $this->getPages()
+			->merge($pages);
+		
+		$this->sortAdminPages();
 	}
 	
 	//--- Protected helpers -------------------------------------------------------------------------------------------
 	
-	///**
-	// * Get the absolute path to an admin panel relative path. If no
-	// * $path parameter is given, the absolute root path of
-	// * the admin panel package is returned.
-	// *
-	// * @param string|null $path
-	// *
-	// * @return string
-	// */
-	//protected static function adminPanelPackagePath(?string $path = null)
-	//{
-	//	return rtrim(dirname(__DIR__), DIRECTORY_SEPARATOR)
-	//		. DIRECTORY_SEPARATOR
-	//		. ltrim($path ? $path : '', DIRECTORY_SEPARATOR);
-	//}
-	
-	/**
-	 * Get a collection of class names in the given folder, with the given namespace.
-	 * Only classes which inherit the AdminPage Livewire Component are returned.
-	 * The keys of the classes are the slugs of the component page names.
-	 *
-	 * @param string $folder
-	 * @param string $namespace
-	 *
-	 * @return Collection
-	 */
-	protected static function getClasses(string $folder, string $namespace): Collection
+	protected function setupPageCollection()
 	{
-		if (!is_dir($folder))
-			return collect();
+		$adminPageCollectors = App::tagged('admin-pages');
 		
-		$files = File::allFiles($folder);
+		$adminPages = [];
 		
-		$classes = collect();
-		foreach ($files as $file) {
-			if ($file->getExtension() !== 'php')
-				continue;
-			
-			//try to guess the class name
-			$className = "{$namespace}\\{$file->getFilenameWithoutExtension()}";
-			
-			//if this class exists and is a Livewire Component, add it to the class list
-			if (is_subclass_of($className, AdminPage::class))
-				$classes->put($className::getAdminPageUid(), $className);
+		foreach ($adminPageCollectors as $adminPageCollector) {
+			if (is_callable([$adminPageCollector, 'resolve']))
+				$adminPages = array_merge($adminPages, $adminPageCollector->resolve());
 		}
 		
-		return $classes;
+		$this->pages = Collection::wrap($adminPages)
+			//->sortBy('position')
+			->map(fn($attributes, $uid) => $this->instantiateAdminPage($attributes, $uid));
+		
+		$this->sortAdminPages();
+	}
+	
+	protected function sortAdminPages()
+	{
+		$this->pages = $this->getPages()->sortBy(fn(AdminPage $adminPage) => $adminPage->getPosition());
+	}
+	
+	protected function instantiateAdminPage($attributes, $uid)
+	{
+		$pageUid = Str::kebab($attributes['uid'] ?? $uid);
+		
+		return new AdminPage(
+			$attributes['name'],
+			$pageUid,
+			$attributes['icon'] ?? null,
+			$attributes['menuLabel'] ?? null,
+			$attributes['position'] ?? null,
+			$attributes['url'] ?? $pageUid,
+			$attributes['view'] ?? null,
+			$attributes['viewData'] ?? []
+		);
 	}
 }
