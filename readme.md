@@ -212,3 +212,66 @@ the default config. This allows you, for example, to just use the 'web' middlewa
 development environment, so you don't have to create a user and log in every time to access your admin-panel.
 
 e.g. `ADMIN_PANEL_MIDDLEWARE="web,some-special-middleware"`
+
+
+## Package development & extending the Admin Page
+
+The Admin Panel is intended to be easily integrated into existing laravel applications, but also easily extended and
+used in other packages, where you want to publish admin pages to give your users access to some aspects of your package.
+
+### The AdminPanel Facade
+
+Through the AdminPanel Facade you have access to all settings of the admin panel and its admin pages. You can get
+all admin pages, add new ones.
+
+You can use this facade if you want to build your own admin panel layout, to read all admin pages and add menu items
+for all admin pages.
+
+### The AdminPage instances
+
+The Admin Panel generates an `AntonioPrimera\AdminPanel\AdminPage` instance for each individual admin page. This class
+exposes all properties of the admin page - their Url, Name, Uid, View, View Data etc.
+
+### Generating admin pages in your packages
+
+You can easily add admin pages for your package, without having to require this package, by simply adding a
+page collector class in your Service Container and tagging it 'admin-pages'.
+
+Here's an example for a HeroIcons package, which adds an admin page listing all available hero icons:
+
+```php
+//WebPageServiceProvider.php
+
+public function register()
+{
+    //...
+    $this->app->bind(HeroIconsAdminPageCollector::class);
+    $this->app->tag(HeroIconsAdminPageCollector::class, 'admin-pages');
+}
+```
+
+This page collector class can be any class, with a simple public method named 'resolve', which returns an array
+of page configurations, exactly what you would write in your `adminPanel.pages` config.
+
+Here's an example of a simple admin page collector for a package of HeroIcons:
+
+```php
+ 
+class HeroIconsAdminPageCollector
+{
+
+    public function resolve()
+    {
+        return [
+            'hero-icons-admin-page' => [
+                'name'      => 'Hero Icons',
+                'icon'      => 'heroicon:shield-check',
+                'view'      => 'hero-icons::admin-panel.icons-list',
+                'viewData'  => ['icons' => HeroIcons::all()],
+            ],
+        ];
+    }
+}
+```
+
+Of course, you can even generate admin pages dynamically for models from the DB or any items in your package.

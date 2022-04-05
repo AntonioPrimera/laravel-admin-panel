@@ -8,7 +8,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static Collection getUrls()
  * @method static Collection getPages()
  * @method static AdminPage|null getPage(string $uid)
  * @method static AdminPage|null getPageByUrl(string $url)
