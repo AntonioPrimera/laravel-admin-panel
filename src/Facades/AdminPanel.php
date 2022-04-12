@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Facade;
  * @method static string getLayout()
  * @method static addPage(AdminPage $adminPage)
  * @method static addPages(Collection $pages)
+ * @method static string getViewType(string $view)
+ * @method static adminPageView(string $adminPageUid, string $view, array $viewData = [], ?string $pageTitle = null)
+ * @method static string|null getView(?string $view)
  */
 class AdminPanel extends Facade
 {

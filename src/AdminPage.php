@@ -1,12 +1,10 @@
 <?php
 namespace AntonioPrimera\AdminPanel;
 
+use AntonioPrimera\AdminPanel\Facades\AdminPanel;
 use AntonioPrimera\HeroIcons\HeroIcon;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
-use Livewire\Component as LivewireComponent;
-use Livewire\Livewire;
 
 class AdminPage
 {
@@ -68,6 +66,13 @@ class AdminPage
 	 */
 	protected array $viewData;
 	
+	/**
+	 * Whether the page can navigate away to other pages with the same url root.
+	 * e.g. "/admin-panel/products" can link to "/admin-panel/products/products/15"
+	 * 		and the menu item is still active also for the second url
+	 */
+	protected bool $hasRelatedPages;
+	
 	public function __construct(
 		string $name,
 		?string $uid = null,
@@ -76,7 +81,8 @@ class AdminPage
 		?int $position = null,
 		?string $url = null,
 		?string $view = null,
-		array $viewData = []
+		array $viewData = [],
+		bool $hasRelatedPages = true,
 	)
 	{
 		$this->name = $name;
@@ -87,6 +93,7 @@ class AdminPage
 		$this->position = $position ?: 0;
 		$this->view = $view;
 		$this->viewData = $viewData;
+		$this->hasRelatedPages = $hasRelatedPages;
 	}
 	
 	//--- Public methods ----------------------------------------------------------------------------------------------
@@ -198,30 +205,27 @@ class AdminPage
 	 */
 	public function getView(): string|null
 	{
-		if ($this->viewIsLivewireComponent())
-			return Livewire::getAlias($this->view) ?: $this->view::getName();
-		
-		if ($this->viewIsBladeComponent())
-			return str_starts_with($this->view, 'components.')
-				? (string) Str::of($this->view)->replaceFirst('components.', '')
-				: $this->view;
-		
-		return $this->view;
+		return AdminPanel::getView($this->view);
 	}
 	
 	public function viewIsLivewireComponent(): bool
 	{
-		return $this->view && is_subclass_of($this->view, LivewireComponent::class);
+		return AdminPanel::getViewType($this->view) === AdminPageManager::VIEW_TYPE_LIVEWIRE;
 	}
 	
 	public function viewIsBladeComponent(): bool
 	{
-		return View::exists((string) Str::of($this->view)->start('components.'));
+		return AdminPanel::getViewType($this->view) === AdminPageManager::VIEW_TYPE_BLADE;
 	}
 	
 	public function getViewData(): array
 	{
 		return $this->viewData;
+	}
+	
+	public function hasRelatedPages()
+	{
+		return $this->hasRelatedPages;
 	}
 	
 	/**
@@ -230,7 +234,11 @@ class AdminPage
 	 */
 	public function isActive()
 	{
-		return Route::currentRouteName() === 'admin-panel'
-			&& Route::current()->parameter('url') === $this->getRawUrl();
+		$currentUrl = Route::current()->parameter('url');
+		$pageUrl = $this->getRawUrl();
+		
+		//Route::currentRouteName() === 'admin-panel' && (...)
+		return $currentUrl === $pageUrl
+			|| ($this->hasRelatedPages && str_starts_with($currentUrl, $pageUrl));
 	}
 }

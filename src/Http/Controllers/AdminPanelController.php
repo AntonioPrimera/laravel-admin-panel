@@ -11,10 +11,17 @@ class AdminPanelController extends Controller
 	public function show(string $url)
 	{
 		$adminPage = AdminPanel::getPageByUrl($url);
-		$layout = AdminPanel::getLayout();
-		$uid = $adminPage->getUid();
+		////$layout = AdminPanel::getLayout();
+		//$uid = $adminPage->getUid();
 		
-		return view('admin-panel::admin-page', compact('uid', 'adminPage', 'layout'));
+		return AdminPanel::adminPageView(
+			$adminPage->getUid(),
+			$adminPage->getRawView(),
+			$adminPage->getViewData(),
+			$adminPage->getName() ?: 'Dashboard'
+		);
+		
+		//return view('admin-panel::admin-page', compact('uid', 'adminPage', 'layout'));
 	}
 	
 	public function index()

@@ -213,6 +213,38 @@ development environment, so you don't have to create a user and log in every tim
 
 e.g. `ADMIN_PANEL_MIDDLEWARE="web,some-special-middleware"`
 
+## Using your own Controllers to add views to the Admin Panel
+
+Starting with version 2.2 of the admin-panel, you can roll your own admin pages and easily add them to the
+admin panel. This is especially useful if you want to associate more than one page with an admin panel menu item.
+
+For example, if you have an '/admin-panel/products' page listing all your products, configured in your adminPanel
+config file, you can add a product detail page to your admin panel, under the same admin page (the same menu item
+appears as active): '/admin-panel/products/{product}'.
+
+You can do this in your own Controller (e.g. `App\Http\Controllers\AdminPanel\ProductsController`) like this:
+
+```php
+
+class ProductsController extends Controller
+{
+
+    public function show(Product $product)
+    {
+        return AdminPanel::adminPageView(
+            'products',                     //the uid of the admin page which should be marked as active in the menu
+            'admin-panel.products.show',    //the view (blade file in this case)
+            ['product' => $product],        //the view data
+            $product->name                  //the page title (for some layouts / mobile view)
+        );
+    }
+}
+```
+
+As seen in the example above, you can use the `adminPageView` method of the `AdminPanel` facade to return the
+proper view. You can use either a blade view, by its name, the class name of a Livewire component or even an
+inline view as the second argument ($view).
+
 
 ## Package development & extending the Admin Page
 

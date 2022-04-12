@@ -1,10 +1,10 @@
-<x-dynamic-component :component="$layout" :active-admin-page="$adminPage">
-	@if($adminPage->viewIsLivewireComponent())
-		@livewire($adminPage->getView(), $adminPage->getViewData())
-	@elseif($adminPage->viewIsBladeComponent())
-		<x-dynamic-component :component="$adminPage->getView()"/>
-	@elseif($adminPage->getView())
-		{!! $adminPage->getView() !!}
+<x-dynamic-component :component="$layout" :admin-page-uid="$adminPageUid" :pageTitle="$pageTitle">
+	@if($viewType === \AntonioPrimera\AdminPanel\AdminPageManager::VIEW_TYPE_LIVEWIRE)
+		@livewire($view, $viewData)
+	@elseif($viewType === \AntonioPrimera\AdminPanel\AdminPageManager::VIEW_TYPE_BLADE)
+		@include($view, $viewData)
+	@elseif($viewType === \AntonioPrimera\AdminPanel\AdminPageManager::VIEW_TYPE_INLINE)
+		{!! $view !!}
 	@else
 		<x-admin-panel::errors.missing-admin-page-view/>
 	@endif

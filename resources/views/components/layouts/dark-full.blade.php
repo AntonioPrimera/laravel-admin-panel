@@ -1,4 +1,5 @@
-@props(['activeAdminPage' => null])
+{{--@props(['activeAdminPage' => null])--}}
+@props(['adminPageUid' => null, 'pageTitle' => 'Dashboard'])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-gray-100">
 <head>
@@ -86,9 +87,9 @@
 					<nav class="px-2 space-y-1">
 
 						@foreach(\AntonioPrimera\AdminPanel\Facades\AdminPanel::getPages() as $adminPage)
-							<a href="{{ $adminPage->getUrl() }}" class="{{ $adminPage->isActive() ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} group flex items-center px-2 py-2 text-base font-medium rounded-md">
+							<a href="{{ $adminPage->getUrl() }}" class="{{ $adminPageUid === $adminPage->getUid() ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} group flex items-center px-2 py-2 text-base font-medium rounded-md">
 								@if($adminPage->hasHeroIcon())
-									{!! $adminPage->getHeroIcon()->setClass('mr-4 flex-shrink-0 h-6 w-6 ' . ($adminPage->isActive() ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'))->render() !!}
+									{!! $adminPage->getHeroIcon()->setClass('mr-4 flex-shrink-0 h-6 w-6 ' . ($adminPageUid === $adminPage->getUid() ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'))->render() !!}
 								@else
 									{!! $adminPage->getIcon() !!}
 								@endif
@@ -139,9 +140,9 @@
 					<nav class="flex-1 px-2 py-4 space-y-1">
 						{{-- todo: make a component for this menu and maybe use it also for the mobile menu --}}
 						@foreach(\AntonioPrimera\AdminPanel\Facades\AdminPanel::getPages() as $adminPage)
-							<a href="{{ $adminPage->getUrl() }}" class="{{ $adminPage->isActive() ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+							<a href="{{ $adminPage->getUrl() }}" class="{{ $adminPageUid === $adminPage->getUid() ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
 								@if($adminPage->hasHeroIcon())
-									{!! $adminPage->getHeroIcon()->setClass('mr-3 flex-shrink-0 h-6 w-6 ' . ($adminPage->isActive() ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'))->render() !!}
+									{!! $adminPage->getHeroIcon()->setClass('mr-3 flex-shrink-0 h-6 w-6 ' . ($adminPageUid === $adminPage->getUid() ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'))->render() !!}
 								@else
 									{!! $adminPage->getIcon() !!}
 								@endif
@@ -188,7 +189,8 @@
 				</button>
 				<div class="flex-1 px-4 flex justify-between">
 					<div class="max-w-7xl px-4 sm:px-6 md:px-8 flex-1 flex items-center">
-						<h1 class="text-2xl font-semibold text-gray-900">{{ $activeAdminPage ? $activeAdminPage->getName() : 'Dashboard' }}</h1>
+{{--						<h1 class="text-2xl font-semibold text-gray-900">{{ $activeAdminPage ? $activeAdminPage->getName() : 'Dashboard' }}</h1>--}}
+						<h1 class="text-2xl font-semibold text-gray-900">{{ $pageTitle }}</h1>
 					</div>
 				</div>
 			</div>
