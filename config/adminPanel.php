@@ -5,6 +5,7 @@ return [
 	
 	//set to boolean false if the project does not use TailwindCss
 	'projectTailwindCss' => 'css/app.css',
+	'useLaravelMix' => env('ADMIN_PANEL_LARAVEL_MIX', false),
 	
 	'routePrefix' => env('ADMIN_PANEL_ROUTE_PREFIX', 'admin-panel'),
 	'middleware'  => explode(',', env('ADMIN_PANEL_MIDDLEWARE', 'web,auth')),

@@ -13,7 +13,7 @@
 
 	<!-- Styles -->
 	@if(config('adminPanel.projectTailwindCss'))
-		<link rel="stylesheet" href="{{ asset(config('adminPanel.projectTailwindCss')) }}">
+		<link rel="stylesheet" href="{{ config('adminPanel.useLaravelMix') ? mix(config('adminPanel.projectTailwindCss')) : asset(config('adminPanel.projectTailwindCss')) }}">
 	@else
 		{{-- If the project does not use Tailwind, use this raw Tailwind version from CDN --}}
 		<script src="https://cdn.tailwindcss.com"></script>
@@ -21,7 +21,7 @@
 	@endif
 
 	<!-- Scripts -->
-	<script src="{{ asset('js/app.js') }}" defer></script>
+	<script src="{{ config('adminPanel.useLaravelMix') ? mix('js/app.js') : asset('js/app.js') }}" defer></script>
 	<script defer src="https://unpkg.com/alpinejs@3.8.1/dist/cdn.min.js"></script>
 
 	<style>
