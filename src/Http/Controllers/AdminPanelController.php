@@ -8,14 +8,18 @@ use Illuminate\Routing\Controller;
 class AdminPanelController extends Controller
 {
 	
-	public function show(string $url)
+	public function show(string $uid)
 	{
-		$adminPage = AdminPanel::getPageByUrl($url);
-		////$layout = AdminPanel::getLayout();
-		//$uid = $adminPage->getUid();
+		$adminPage = AdminPanel::getPage($uid);
+		
+		//todo: make a nice 404 page inside the admin-panel layout
+		if (!$adminPage)
+			abort(404);
+		
+		AdminPanel::setCurrentPageUid($uid);
 		
 		return AdminPanel::adminPageView(
-			$adminPage->getUid(),
+			$uid,
 			$adminPage->getRawView(),
 			$adminPage->getViewData(),
 			$adminPage->getName() ?: 'Dashboard'

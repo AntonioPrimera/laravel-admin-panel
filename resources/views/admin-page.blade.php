@@ -1,4 +1,4 @@
-<x-dynamic-component :component="$layout" :admin-page-uid="$adminPageUid" :pageTitle="$pageTitle">
+<x-admin-panel-layout>
 	@if($viewType === \AntonioPrimera\AdminPanel\AdminPageManager::VIEW_TYPE_LIVEWIRE)
 		@livewire($view, $viewData)
 	@elseif($viewType === \AntonioPrimera\AdminPanel\AdminPageManager::VIEW_TYPE_BLADE)
@@ -8,4 +8,4 @@
 	@else
 		<x-admin-panel::errors.missing-admin-page-view/>
 	@endif
-</x-dynamic-component>
+</x-admin-panel-layout>

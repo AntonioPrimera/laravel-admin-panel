@@ -9,7 +9,7 @@ Route::prefix(config('adminPanel.routePrefix'))
 	->name('admin-panel-dashboard');
 
 Route::prefix(config('adminPanel.routePrefix'))
-	->get('{url}', [AdminPanelController::class, 'show'])
+	->get('{uid}', [AdminPanelController::class, 'show'])
 	->middleware(config('adminPanel.middleware'))
 	->name('admin-panel');
 	

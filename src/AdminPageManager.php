@@ -16,6 +16,7 @@ class AdminPageManager
 	const VIEW_TYPE_UNDEFINED = 'undefined';
 	
 	protected ?Collection $pages = null;
+	protected ?string $currentPageUid = null;
 	
 	public function getPages(): Collection
 	{
@@ -25,14 +26,9 @@ class AdminPageManager
 		return $this->pages;
 	}
 	
-	public function getPage(string $uid): AdminPage|null
+	public function getPage(?string $uid): AdminPage|null
 	{
 		return $this->getPages()->first(fn(AdminPage $adminPage) => $adminPage->getUid() === $uid);
-	}
-	
-	public function getPageByUrl(string $url)
-	{
-		return $this->getPages()->first(fn(AdminPage $adminPage) => $adminPage->getRawUrl() === $url);
 	}
 	
 	public function getLayout(): string
@@ -61,17 +57,16 @@ class AdminPageManager
 	 * This can be used in any Controller, to render custom Livewire,
 	 * Blade or inline views, wrapped in the admin-panel layout
 	 */
-	public function adminPageView(string $adminPageUid, string $view, array $viewData = [], ?string $pageTitle = null)
+	public function adminPageView(string $adminPageUid, string $view, array $viewData = [])
 	{
+		static::setCurrentPageUid($adminPageUid);
+		
 		return view(
 			'admin-panel::admin-page',
 			[
-				'layout' 		=> $this->getLayout(),
 				'viewType' 		=> $this->getViewType($view),
-				'adminPageUid' 	=> $adminPageUid,
-				'view'			=> $this->getView($view),
+				'view'			=> $this->getViewAlias($view),
 				'viewData' 		=> $viewData,
-				'pageTitle'		=> $pageTitle
 			]
 		);
 	}
@@ -100,12 +95,36 @@ class AdminPageManager
 	 * the actual view. This is necessary for Livewire
 	 * components, which can have aliases.
 	 */
-	public function getView(?string $view): string|null
+	public function getViewAlias(?string $view): string|null
 	{
 		if ($this->getViewType($view) === static::VIEW_TYPE_LIVEWIRE)
 			return Livewire::getAlias($view) ?: $view::getName();
 		
 		return $view;
+	}
+	
+	/**
+	 * Get the currently active admin page
+	 */
+	public function getCurrentPage(): AdminPage | null
+	{
+		return $this->currentPageUid
+			? $this->getPage($this->currentPageUid)
+			: $this->getPages()->first(fn(AdminPage $adminPage) => $adminPage->isActive());
+	}
+	
+	public function setCurrentPageUid(string|null $uid): static
+	{
+		$this->currentPageUid = $uid;
+		return $this;
+	}
+	
+	public function getCurrentPageUid(): string | null
+	{
+		if (!$this->currentPageUid)
+			$this->currentPageUid = $this->getCurrentPage()?->getUid();
+		
+		return $this->currentPageUid;
 	}
 	
 	//--- Protected helpers -------------------------------------------------------------------------------------------
@@ -123,7 +142,8 @@ class AdminPageManager
 		
 		$this->pages = Collection::wrap($adminPages)
 			//->sortBy('position')
-			->map(fn($attributes, $uid) => $this->instantiateAdminPage($attributes, $uid));
+			->map(fn($attributes, $uid) => $this->instantiateAdminPage($attributes, $uid))
+			->filter();
 		
 		$this->sortAdminPages();
 	}
@@ -133,8 +153,12 @@ class AdminPageManager
 		$this->pages = $this->getPages()->sortBy(fn(AdminPage $adminPage) => $adminPage->getPosition());
 	}
 	
-	protected function instantiateAdminPage($attributes, $uid)
+	protected function instantiateAdminPage($attributes, $uid): AdminPage | null
 	{
+		//an admin page must have at least one of these attributes configured: view, url or route
+		if (!($attributes['view'] ?? $attributes['route'] ?? $attributes['url'] ?? false))
+			return null;
+		
 		$pageUid = Str::kebab($attributes['uid'] ?? $uid);
 		
 		return new AdminPage(
@@ -143,10 +167,16 @@ class AdminPageManager
 			$attributes['icon'] ?? null,
 			$attributes['menuLabel'] ?? null,
 			$attributes['position'] ?? null,
-			$attributes['url'] ?? $pageUid,
+			isset($attributes['route']) ? route($attributes['route']) : ($attributes['url'] ?? null),
 			$attributes['view'] ?? null,
 			$attributes['viewData'] ?? [],
 			$attributes['hasRelatedPages'] ?? true,
 		);
+	}
+	
+	protected function determineCurrentPageUid(): string | null
+	{
+		$currentPage = $this->getCurrentPage();
+		return $currentPage ? $currentPage->getUid() : null;
 	}
 }

@@ -1,5 +1,4 @@
-{{--@props(['activeAdminPage' => null])--}}
-@props(['adminPageUid' => null, 'pageTitle' => 'Dashboard'])
+{{--@props(['pageTitle' => 'Dashboard'])--}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-gray-100">
 <head>
@@ -27,6 +26,12 @@
 	<style>
 		[x-cloak] { display: none !important; }
 	</style>
+
+	@php
+		$currentAdminPage = \AntonioPrimera\AdminPanel\Facades\AdminPanel::getCurrentPage();
+		$currentAdminPageUid = \AntonioPrimera\AdminPanel\Facades\AdminPanel::getCurrentPageUid();
+		$pageTitle = $currentAdminPage ? $currentAdminPage->getName() : 'Dashboard';
+	@endphp
 
 	@livewireStyles
 </head>
@@ -87,9 +92,9 @@
 					<nav class="px-2 space-y-1">
 
 						@foreach(\AntonioPrimera\AdminPanel\Facades\AdminPanel::getPages() as $adminPage)
-							<a href="{{ $adminPage->getUrl() }}" class="{{ $adminPageUid === $adminPage->getUid() ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} group flex items-center px-2 py-2 text-base font-medium rounded-md">
+							<a href="{{ $adminPage->getUrl() }}" class="{{ $currentAdminPageUid === $adminPage->getUid() ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} group flex items-center px-2 py-2 text-base font-medium rounded-md">
 								@if($adminPage->hasHeroIcon())
-									{!! $adminPage->getHeroIcon()->setClass('mr-4 flex-shrink-0 h-6 w-6 ' . ($adminPageUid === $adminPage->getUid() ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'))->render() !!}
+									{!! $adminPage->getHeroIcon()->setClass('mr-4 flex-shrink-0 h-6 w-6 ' . ($currentAdminPageUid === $adminPage->getUid() ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'))->render() !!}
 								@else
 									{!! $adminPage->getIcon() !!}
 								@endif
@@ -100,6 +105,59 @@
 					</nav>
 				</div>
 
+				{{-- Sidebar Profile & Logout --}}
+				@auth
+					<form method="POST" action="{{ route('logout') }}">
+						@csrf
+						<div class="flex-shrink-0 flex bg-gray-700 p-4">
+							<a href="#" class="flex-shrink-0 w-full group block" onclick="event.preventDefault();this.closest('form').submit();">
+								<div class="flex items-center">
+									{{-- HeroIcon: user --}}
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+									</svg>
+
+									<div class="ml-3">
+										<p class="text-sm font-medium text-white">{{ auth()->user()->name }}</p>
+										<p class="text-xs font-medium text-gray-300 group-hover:text-gray-200">{{ __('Log Out') }}</p>
+									</div>
+								</div>
+							</a>
+						</div>
+					</form>
+				@endauth
+
+			</div>
+
+			<div class="flex-shrink-0 w-14" aria-hidden="true">
+				{{-- Dummy element to force sidebar to shrink to fit close icon --}}
+			</div>
+		</div>
+
+		<!-- Static sidebar for desktop -->
+		<div class="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
+			<!-- Sidebar component, swap this element with another sidebar if you like -->
+			<div class="flex-1 flex flex-col min-h-0 bg-gray-800">
+				<div class="flex items-center h-16 flex-shrink-0 px-4 bg-gray-900">
+					<a class="text-2xl font-semibold text-white" href="{{ route('admin-panel-dashboard') }}">{{ 'Admin Panel' }}</a>
+				</div>
+				<div class="flex-1 flex flex-col overflow-y-auto">
+					<nav class="flex-1 px-2 py-4 space-y-1">
+						{{-- todo: make a component for this menu and maybe use it also for the mobile menu --}}
+						@foreach(\AntonioPrimera\AdminPanel\Facades\AdminPanel::getPages() as $adminPage)
+							<a href="{{ $adminPage->getUrl() }}" class="{{ $currentAdminPageUid === $adminPage->getUid() ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+								@if($adminPage->hasHeroIcon())
+									{!! $adminPage->getHeroIcon()->setClass('mr-3 flex-shrink-0 h-6 w-6 ' . ($currentAdminPageUid === $adminPage->getUid() ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'))->render() !!}
+								@else
+									{!! $adminPage->getIcon() !!}
+								@endif
+								{{ $adminPage->getMenuLabel() }}
+							</a>
+						@endforeach
+					</nav>
+				</div>
+
+				{{-- Sidebar Profile & Logout --}}
 				@auth
 					<form method="POST" action="{{ route('logout') }}">
 						@csrf
@@ -121,41 +179,12 @@
 					</form>
 				@endauth
 			</div>
-
-			<div class="flex-shrink-0 w-14" aria-hidden="true">
-				{{-- Dummy element to force sidebar to shrink to fit close icon --}}
-			</div>
-		</div>
-
-		<!-- Static sidebar for desktop -->
-		<div class="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
-			<!-- Sidebar component, swap this element with another sidebar if you like -->
-			<div class="flex-1 flex flex-col min-h-0 bg-gray-800">
-				<div class="flex items-center h-16 flex-shrink-0 px-4 bg-gray-900">
-					<a class="text-2xl font-semibold text-white" href="{{ route('admin-panel-dashboard') }}">{{ 'Admin Panel' }}</a>
-				</div>
-				<div class="flex-1 flex flex-col overflow-y-auto">
-					<nav class="flex-1 px-2 py-4 space-y-1">
-						{{-- todo: make a component for this menu and maybe use it also for the mobile menu --}}
-						@foreach(\AntonioPrimera\AdminPanel\Facades\AdminPanel::getPages() as $adminPage)
-							<a href="{{ $adminPage->getUrl() }}" class="{{ $adminPageUid === $adminPage->getUid() ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white" }} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-								@if($adminPage->hasHeroIcon())
-									{!! $adminPage->getHeroIcon()->setClass('mr-3 flex-shrink-0 h-6 w-6 ' . ($adminPageUid === $adminPage->getUid() ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'))->render() !!}
-								@else
-									{!! $adminPage->getIcon() !!}
-								@endif
-								{{ $adminPage->getMenuLabel() }}
-							</a>
-						@endforeach
-					</nav>
-				</div>
-			</div>
 		</div>
 
 
 		<div class="md:pl-64 flex flex-col">
 			{{-- Header: Mobile (Burger + Page name) / Desktop (Page name) --}}
-			<div class="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white shadow">
+			<div class="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white shadow md:hidden">
 				<button @click="showMobileMenu = true" type="button" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden">
 					<span class="sr-only">Open sidebar</span>
 					<!-- Heroicon name: outline/menu-alt-2 -->
@@ -168,61 +197,11 @@
 {{--						<h1 class="text-2xl font-semibold text-gray-900">{{ $activeAdminPage ? $activeAdminPage->getName() : 'Dashboard' }}</h1>--}}
 						<h1 class="text-2xl font-semibold text-gray-900">{{ $pageTitle }}</h1>
 					</div>
-
-					<div class="ml-4 flex items-center md:ml-6">
-
-						@auth
-							{{-- Profile dropdown - top right --}}
-							<div class="ml-3 relative hidden md:block px-8" x-data="{profileOpen: false}" @click.outside="profileOpen = false">
-								<div>
-									<button @click="profileOpen = !profileOpen" type="button" class="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
-										<span class="sr-only">Open user menu</span>
-										{{-- HeroIcon: user --}}
-										<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-										</svg>
-										<span class="pl-2 hidden md:inline">{{ auth()->user()->name }}</span>
-									</button>
-								</div>
-
-								<!--
-								  Dropdown menu, show/hide based on menu state.
-
-								  Entering: "transition ease-out duration-100"
-									From: "transform opacity-0 scale-95"
-									To: "transform opacity-100 scale-100"
-								  Leaving: "transition ease-in duration-75"
-									From: "transform opacity-100 scale-100"
-									To: "transform opacity-0 scale-95"
-								-->
-								<div x-show="profileOpen" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
-									<!-- Active: "bg-gray-100", Not Active: "" -->
-									<form method="POST" action="{{ route('logout') }}">
-										@csrf
-
-										<a href="{{ route('logout') }}"
-										   onclick="event.preventDefault();this.closest('form').submit();"
-										   class="block px-4 py-2 text-sm text-gray-700 cursor-pointer"
-										   role="menuitem"
-										   tabindex="-1"
-										>
-											{{ __('Log Out') }}
-										</a>
-									</form>
-								</div>
-							</div>
-						@endauth
-
-					</div>
 				</div>
 			</div>
 
 			<main class="flex-1">
-				<div class="py-6">
-					<div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-						{{ $slot }}
-					</div>
-				</div>
+				{{ $slot }}
 			</main>
 		</div>
 	</div>

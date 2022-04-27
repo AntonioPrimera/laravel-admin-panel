@@ -47,7 +47,7 @@ class AdminPage
 	 * Override this if you want to have a specific url for this page.
 	 * If not set, the page uid will be used as the url.
 	 */
-	protected string $url;
+	protected string|null $url;
 	
 	/**
 	 * The order in which it should appear in the admin panel menu.
@@ -89,7 +89,7 @@ class AdminPage
 		$this->uid = $uid ?: Str::slug($name);
 		$this->icon = $icon ?: 'heroicon:hashtag';
 		$this->menuLabel = $menuLabel ?: $name;
-		$this->url = Str::kebab($url ?: $this->uid);
+		$this->url = $url; //Str::kebab($url ?: $this->uid);
 		$this->position = $position ?: 0;
 		$this->view = $view;
 		$this->viewData = $viewData;
@@ -133,17 +133,19 @@ class AdminPage
 		return $this->icon;
 	}
 	
-	public function getRawUrl(): string
-	{
-		return $this->url;
-	}
+	//public function getRawUrl(): string
+	//{
+	//	return $this->url;
+	//}
 	
 	public function getUrl(): string
 	{
-		$prefix = trim(config('adminPanel.routePrefix', ''), '/');
-		$pageUrl = trim($this->url, '/');
+		if ($this->url)
+			return $this->url;
 		
-		return '/' . implode('/', array_filter([$prefix, $pageUrl]));
+		$prefix = trim(config('adminPanel.routePrefix', ''), '/');
+		
+		return '/' . implode('/', array_filter([$prefix, $this->uid]));
 	}
 	
 	/**
@@ -235,7 +237,7 @@ class AdminPage
 	public function isActive()
 	{
 		$currentUrl = Route::current()->parameter('url');
-		$pageUrl = $this->getRawUrl();
+		$pageUrl = $this->getUrl();
 		
 		//Route::currentRouteName() === 'admin-panel' && (...)
 		return $currentUrl === $pageUrl

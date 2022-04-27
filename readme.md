@@ -80,11 +80,14 @@ return [
 #### name (required)
 
 This is a mandatory setting for each page. This is the human-readable name and title of the admin page. If the
-'menuLabel' is not provided, this name will be used also as the label of this page in the admin panel menu.
+'menuLabel' is not provided, this name will be used also as the label of this page in the admin panel menu. 
 
-#### view (required)
+#### view (optional)
 
-For the admin page view, you can use a livewire component (recommended), a blade component or an inline view.
+If you don't need some complex logic, you can just create a view and use it as an admin page. This view will be wrapped
+in the admin panel layout.
+
+You can use a livewire component (recommended), a blade component or an inline view.
 
 ###### View Option 1: Admin Page Livewire Components
 
@@ -162,19 +165,25 @@ e.g.
 
 #### url (optional)
 
-By default, the url for each page is composed by adding the admin page key (or uid) from the config to the url prefix.
-
-e.g. for our first example, where the page key (the array key of the page settings) is 'site-settings', and the
-admin panel url prefix is 'my-admin-panel', the url for this page would be:
-
-`https://your-project.com/my-admin-panel/site-settings`
-
-If you wish to use a different url, maybe a random url part, you can set it in the page config.
+If you want to have an admin page point to a specific url, you can provide the full url here. If you don't provide
+an url or a route, you must provide a view (Livewire / blade / inline), which the AdminPanel will associate with
+its own route `admin-panel/{uid}`. In this case the uid will be used to differentiate the admin page.
 
 e.g.
 ```php
-    'url' => 'some-random-url-part',    //results in: https://my-project.com/admin-panel/some-random-url-part
+    'url' => '/products/index',
 ```
+
+#### route (optional)
+
+If you use named routes, you can provide a route name, to determine the corresponding url. This is an alternative
+to the `url` attribute (use one or the other, don't use both).
+
+e.g.
+```php
+    'route' => 'products.index',
+```
+
 
 #### uid (optional)
 
@@ -222,29 +231,54 @@ For example, if you have an '/admin-panel/products' page listing all your produc
 config file, you can add a product detail page to your admin panel, under the same admin page (the same menu item
 appears as active): '/admin-panel/products/{product}'.
 
-You can do this in your own Controller (e.g. `App\Http\Controllers\AdminPanel\ProductsController`) like this:
+### The admin panel layout blade component
+
+The admin-panel package exposes the currently configured admin panel layout as a blade component, aliased by
+**x-admin-page** or **x-admin-panel-layout** (two aliases for the same layout).
+
+The layout component accepts an optional parameter `uid`, which can be used to show one of the pages in the menu as
+active. Behind the scenes, the view uses `AdminPanel::setCurrentPageUid(<active admin page uid>);` to set the given
+uid as the currently active admin page uid in the admin panel.
+
+e.g.
 
 ```php
+//your adminPanel config - you must provide the proper url or route name for the admin page
+return [
+    //...
+    'pages' => [
+        'machines' => [
+            'name' => 'Products'
+            'icon' => 'hero:cog',
+            'url' => '/products',   //or 'route' => 'products.index'
+        ],
+    ],
+]
+```
 
-class ProductsController extends Controller
+```php
+//your Controller - no special treatment here
+class MachineManager extends Controller
 {
-
-    public function show(Product $product)
+    public function index()
     {
-        return AdminPanel::adminPageView(
-            'products',                     //the uid of the admin page which should be marked as active in the menu
-            'admin-panel.products.show',    //the view (blade file in this case)
-            ['product' => $product],        //the view data
-            $product->name                  //the page title (for some layouts / mobile view)
-        );
+        return view('machines.index', ['products' => Products::available()->get()]);
     }
 }
 ```
 
-As seen in the example above, you can use the `adminPageView` method of the `AdminPanel` facade to return the
-proper view. You can use either a blade view, by its name, the class name of a Livewire component or even an
-inline view as the second argument ($view).
+```php
+//your routes file (usually: routes/web.php) - no special treatment here
+Route::get('/machines', [MachineController::class, 'index'])->name('machines.index');
+```
 
+```html
+<!-- Your blade file (resources/views/machines/index.blade.php) -->
+<!-- Just wrap everything in the x-admin-page layout and provide the active admin-page uid as an attribute -->
+<x-admin-page uid="machines">
+    ... your admin page content goes here ...
+</x-admin-page>
+```
 
 ## Package development & extending the Admin Page
 
