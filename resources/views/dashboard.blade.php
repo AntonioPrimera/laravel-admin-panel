@@ -1,4 +1,4 @@
-<x-dynamic-component :component="$layout">
+<x-admin-panel-layout>
 	@if($adminPages->isEmpty())
 		<x-admin-panel::errors.generic title="No admin pages" description="Your admin panel is empty and doesn't contain any admin pages."/>
 	@else
@@ -10,4 +10,4 @@
 			@endforeach
 		</div>
 	@endif
-</x-dynamic-component>
+</x-admin-panel-layout>
