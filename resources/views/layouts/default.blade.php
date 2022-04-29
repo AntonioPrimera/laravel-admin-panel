@@ -36,7 +36,7 @@
 </head>
 
 <body class="font-sans antialiased h-full">
-	<div x-data="{showMobileMenu: false}">
+	<div x-data="{showMobileMenu: false}" class="md:h-full">
 
 		{{-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. --}}
 		<div x-cloak x-show="showMobileMenu" class="fixed inset-0 flex z-40 md:hidden" role="dialog" aria-modal="true">
@@ -157,7 +157,7 @@
 		</div>
 
 
-		<div class="md:pl-64 flex flex-col">
+		<div class="md:pl-64 flex flex-col md:h-full">
 			{{-- Header: Mobile (Burger + Page name) / Desktop (Page name) --}}
 			<div class="sticky top-0 z-10 flex-shrink-0 flex h-16 bg-white shadow">
 				<button @click="showMobileMenu = true" type="button" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden">
