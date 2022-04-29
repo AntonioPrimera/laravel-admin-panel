@@ -200,7 +200,7 @@
 				</div>
 			</div>
 
-			<main class="flex-1">
+			<main class="flex-1 md:h-full">
 				{{ $slot }}
 			</main>
 		</div>

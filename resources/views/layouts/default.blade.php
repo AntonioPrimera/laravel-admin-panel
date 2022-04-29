@@ -221,9 +221,9 @@
 				</div>
 			</div>
 
-			<main class="flex-1">
-				<div class="py-6">
-					<div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+			<main class="flex-1 md:h-full">
+				<div class="py-6 md:h-full">
+					<div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 md:h-full">
 						{{ $slot }}
 					</div>
 				</div>
